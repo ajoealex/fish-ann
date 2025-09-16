@@ -1,4 +1,4 @@
-# fish p5-nn – Neural Network Fish School Simulation
+# fish-p5js-nn – Neural Network Fish School Simulation
 
 ## Overview
 This project is an **HTML5 + p5.js** web app that visualizes a **Fish Schooling Simulation (FSS)** driven by simple **neural networks**. Each fish acts as an autonomous agent that uses local sensory input and a small feed-forward neural network to decide its movement. The simulation demonstrates **emergent collective behavior**, commonly studied in **swarm intelligence** and **boids-style** algorithms.
