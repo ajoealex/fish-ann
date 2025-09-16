@@ -229,23 +229,26 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   frameRate(60);
 
-  // Initial spawn: 20 fishes and 60 food
+  // Initial spawn of 20 fishes and TOTAL_FOOD food
   spawnFishes(20);
   for (let i = 0; i < TOTAL_FOOD; i++) {
     foods.push(createVector(random(20, width - 20), random(20, height - 20)));
   }
-document.getElementById('setFoodCountBtn').onclick = () => {
-  const val = parseInt(document.getElementById('foodCount').value);
-  if (!isNaN(val) && val > 0) {
-    // Adjust TOTAL_FOOD dynamically
-    while (foods.length < val) {
-      foods.push(createVector(random(20, width-20), random(20, height-20)));
+
+  // Button to set food count dynamically
+  document.getElementById('setFoodCountBtn').onclick = () => {
+    const val = parseInt(document.getElementById('foodCount').value);
+    if (!isNaN(val) && val > 0) {
+      TOTAL_FOOD = val;
+      // Adjust foods array to match new TOTAL_FOOD
+      while (foods.length < TOTAL_FOOD) {
+        foods.push(createVector(random(20, width - 20), random(20, height - 20)));
+      }
+      while (foods.length > TOTAL_FOOD) {
+        foods.pop();
+      }
     }
-    while (foods.length > val) {
-      foods.pop();
-    }
-  }
-};
+  };
 
   document.getElementById('spawnBtn').onclick = () => {
     spawnFishes(parseInt(document.getElementById('fishCount').value));
@@ -262,6 +265,12 @@ function draw() {
     deadGenerations++;
     spawnFishes(parseInt(document.getElementById('fishCount').value));
   }
+
+  // Safety: keep food count constant
+  while (foods.length < TOTAL_FOOD) {
+    foods.push(createVector(random(20, width - 20), random(20, height - 20)));
+  }
+  if (foods.length > TOTAL_FOOD) foods.length = TOTAL_FOOD;
 
   fill(255, 150, 0);
   for (const food of foods) ellipse(food.x, food.y, 10, 10);
