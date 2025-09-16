@@ -13,7 +13,7 @@ let fishes = [];
 let foods = [];
 let lastFoodSpawn = 0;
 let spawnInterval = 2000;
-let foodCountPerSpawn = 3;
+let foodCountPerSpawn = 3; // acts as the number of food per spawn cycle
 let score = 0;
 let deadGenerations = 0;
 let pointerPositions = []; // holds active pointer/touch positions
@@ -134,6 +134,9 @@ class Fish {
               delete this.targetFood.claimedBy;
               foods.splice(idx,1);
             }
+            // Spawn one new food at random position after eating
+            foods.push(createVector(random(20,width-20), random(20,height-20)));
+
             this.vel.mult(POST_EAT_SLOWDOWN);
             this.targetFood=null;
             this.reactionTimer=null;
@@ -184,7 +187,6 @@ class Fish {
     this.applyForce(steer);
     this.integrateAndCollide();
 
-    // Starvation: die after 1 minute
     const elapsed=millis()-Math.max(this.lastEat,this.spawnTime);
     if(elapsed>60000){ this.dead=true; }
   }
@@ -230,24 +232,22 @@ function setup(){
   createCanvas(windowWidth, windowHeight);
   frameRate(60);
 
-  // Initial spawn of fishes and food
+  // Initial spawn of 20 fishes and 60 food items
   spawnFishes(20);
-  for(let i=0; i<60; i++){
+  for(let i=0;i<60;i++){
     foods.push(createVector(random(20,width-20), random(20,height-20)));
   }
 
-  document.getElementById('setFoodRateBtn').onclick = () => {
-    const val = parseInt(document.getElementById('foodRate').value);
-    if (!isNaN(val) && val > 0) foodCountPerSpawn = val;
+  document.getElementById('setFoodCountBtn').onclick=()=>{
+    const val=parseInt(document.getElementById('foodCount').value);
+    if(!isNaN(val)&&val>0) foodCountPerSpawn=val;
   };
 
   spawnFishes(parseInt(document.getElementById('fishCount').value));
-  document.getElementById('spawnBtn').onclick = () => {
+  document.getElementById('spawnBtn').onclick=()=>{
     spawnFishes(parseInt(document.getElementById('fishCount').value));
   };
 }
-
-
 
 function draw(){
   background(20,50,100);
@@ -283,7 +283,7 @@ function draw(){
   text(`Score: ${score}`,10,20);
   text(`Fishes alive: ${fishes.length}`,10,40);
   text(`Dead Generations: ${deadGenerations}`,10,60);
-  text(`Food Count: ${foodCountPerSpawn}`,10,80);
+  text(`Food Count: ${foods.length}`,10,80);
   text(`Pointer Repel Radius: ${POINTER_REPEL_RADIUS}px`,10,100);
 }
 
@@ -298,22 +298,12 @@ function windowResized(){
 }
 
 // === POINTER/TAP HANDLERS ===
-function mouseMoved(){
-  pointerPositions=[createVector(mouseX,mouseY)];
-}
-function mouseDragged(){
-  pointerPositions=[createVector(mouseX,mouseY)];
-}
-function mouseReleased(){
-  pointerPositions=[];
-}
+function mouseMoved(){ pointerPositions=[createVector(mouseX,mouseY)]; }
+function mouseDragged(){ pointerPositions=[createVector(mouseX,mouseY)]; }
+function mouseReleased(){ pointerPositions=[]; }
 function touchMoved(){
-  pointerPositions = [];
-  for(let t of touches){
-    pointerPositions.push(createVector(t.x,t.y));
-  }
+  pointerPositions=[];
+  for(let t of touches){ pointerPositions.push(createVector(t.x,t.y)); }
   return false;
 }
-function touchEnded(){
-  pointerPositions=[];
-}
+function touchEnded(){ pointerPositions=[]; }
