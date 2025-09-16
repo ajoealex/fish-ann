@@ -297,10 +297,50 @@ function windowResized() { resizeCanvas(windowWidth, windowHeight); }
 function mouseMoved() { pointerPositions = [createVector(mouseX, mouseY)]; }
 function mouseDragged() { pointerPositions = [createVector(mouseX, mouseY)]; }
 function mouseReleased() { pointerPositions = []; }
+// === POINTER/TAP HANDLERS ===
+function mouseMoved() { 
+  pointerPositions = [createVector(mouseX, mouseY)]; 
+}
+function mouseDragged() { 
+  pointerPositions = [createVector(mouseX, mouseY)]; 
+}
+function mouseReleased() { 
+  pointerPositions = []; 
+}
+
+// For mobile: update on every touch frame
+// Called automatically by p5 when a touch begins
+function touchStarted() {
+  pointerPositions = touches.map(t => createVector(t.x, t.y));
+  return false; // prevent default scrolling
+}
+
+// Called automatically by p5 when a touch moves
 function touchMoved() {
-  pointerPositions = [];
-  for (let t of touches) { pointerPositions.push(createVector(t.x, t.y)); }
+  pointerPositions = touches.map(t => createVector(t.x, t.y));
   return false;
 }
-function touchEnded() { pointerPositions = []; }
+
+// Called automatically by p5 when all touches end
+function touchEnded() {
+  pointerPositions = [];
+  return false;
+}
+
+// Called automatically by p5 when the mouse moves
+function mouseMoved() {
+  pointerPositions = [createVector(mouseX, mouseY)];
+}
+
+// Called automatically by p5 when the mouse is dragged
+function mouseDragged() {
+  pointerPositions = [createVector(mouseX, mouseY)];
+}
+
+// Called automatically by p5 when the mouse is released
+function mouseReleased() {
+  pointerPositions = [];
+}
+
+
 
