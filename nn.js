@@ -2,50 +2,114 @@ const sigmoid = x => 1 / (1 + Math.exp(-x));
 const dSigmoid = y => y * (1 - y);
 
 class NeuralNetwork {
-  constructor(i,h,o,lr=0.3){
-    this.i=i; this.h=h; this.o=o; this.lr=lr;
-    this.wih=this.rand(h,i); this.who=this.rand(o,h);
-    this.bh=this.rand(h,1); this.bo=this.rand(o,1);
+  constructor(layers, lr = 0.3) {
+    this.layers = layers; // e.g., [4, 12, 8, 2]
+    this.lr = lr;
+
+    // Initialize weights and biases for each layer
+    this.weights = [];
+    this.biases = [];
+    for (let l = 0; l < layers.length - 1; l++) {
+      this.weights.push(this.rand(layers[l + 1], layers[l]));
+      this.biases.push(this.rand(layers[l + 1], 1));
+    }
   }
-  rand(r,c){ return Array.from({length:r},()=>Array.from({length:c},()=>Math.random()*2-1)); }
-  static dot(a,b){
-    const res = Array.from({length:a.length},()=>Array(b[0].length).fill(0));
-    for(let i=0;i<a.length;i++)for(let j=0;j<b[0].length;j++)for(let k=0;k<b.length;k++)res[i][j]+=a[i][k]*b[k][j];
+
+  rand(r, c) {
+    return Array.from({ length: r }, () =>
+      Array.from({ length: c }, () => Math.random() * 2 - 1)
+    );
+  }
+
+  static dot(a, b) {
+    const res = Array.from({ length: a.length }, () =>
+      Array(b[0].length).fill(0)
+    );
+    for (let i = 0; i < a.length; i++)
+      for (let j = 0; j < b[0].length; j++)
+        for (let k = 0; k < b.length; k++) res[i][j] += a[i][k] * b[k][j];
     return res;
   }
-  static add(a,b){ return a.map((r,i)=>r.map((v,j)=>v+b[i][j])); }
-  static sub(a,b){ return a.map((r,i)=>r.map((v,j)=>v-b[i][j])); }
-  static map(m,f){ return m.map(r=>r.map(f)); }
-  static T(m){ return m[0].map((_,i)=>m.map(r=>r[i])); }
-  static toM(a){ return a.map(v=>[v]); }
 
-  feedForward(input){
-    const inp = NeuralNetwork.toM(input);
-    let h = NeuralNetwork.add(NeuralNetwork.dot(this.wih,inp),this.bh);
-    h = NeuralNetwork.map(h,sigmoid);
-    let o = NeuralNetwork.add(NeuralNetwork.dot(this.who,h),this.bo);
-    o = NeuralNetwork.map(o,sigmoid);
-    return o;
+  static add(a, b) {
+    return a.map((r, i) => r.map((v, j) => v + b[i][j]));
   }
 
-  train(input,target){
-    const inputs = NeuralNetwork.toM(input);
-    const h = NeuralNetwork.map(NeuralNetwork.add(NeuralNetwork.dot(this.wih,inputs),this.bh),sigmoid);
-    const o = NeuralNetwork.map(NeuralNetwork.add(NeuralNetwork.dot(this.who,h),this.bo),sigmoid);
+  static sub(a, b) {
+    return a.map((r, i) => r.map((v, j) => v - b[i][j]));
+  }
+
+  static map(m, f) {
+    return m.map(r => r.map(f));
+  }
+
+  static T(m) {
+    return m[0].map((_, i) => m.map(r => r[i]));
+  }
+
+  static toM(a) {
+    return a.map(v => [v]);
+  }
+
+  feedForward(input) {
+    let activations = NeuralNetwork.toM(input);
+    for (let l = 0; l < this.weights.length; l++) {
+      let z = NeuralNetwork.add(
+        NeuralNetwork.dot(this.weights[l], activations),
+        this.biases[l]
+      );
+      activations = NeuralNetwork.map(z, sigmoid);
+    }
+    return activations;
+  }
+
+  train(input, target) {
+    // Forward pass
+    let activations = [NeuralNetwork.toM(input)];
+    let zs = [];
+    for (let l = 0; l < this.weights.length; l++) {
+      let z = NeuralNetwork.add(
+        NeuralNetwork.dot(this.weights[l], activations[l]),
+        this.biases[l]
+      );
+      zs.push(z);
+      activations.push(NeuralNetwork.map(z, sigmoid));
+    }
+
+    // Output error
     const targets = NeuralNetwork.toM(target);
-    const err = NeuralNetwork.sub(targets,o);
+    let delta = NeuralNetwork.sub(targets, activations.at(-1));
 
-    let grad = NeuralNetwork.map(o,dSigmoid);
-    grad = grad.map((r,i)=>r.map((v,j)=>v*err[i][j]*this.lr));
-    const whoD = NeuralNetwork.dot(grad,NeuralNetwork.T(h));
-    this.who = NeuralNetwork.add(this.who,whoD);
-    this.bo  = NeuralNetwork.add(this.bo,grad);
+    // Backward pass
+    for (let l = this.weights.length - 1; l >= 0; l--) {
+      let grad = NeuralNetwork.map(activations[l + 1], dSigmoid);
+      grad = grad.map((r, i) =>
+        r.map((v, j) => v * delta[i][j] * this.lr)
+      );
+      const weightDelta = NeuralNetwork.dot(
+        grad,
+        NeuralNetwork.T(activations[l])
+      );
+      this.weights[l] = NeuralNetwork.add(this.weights[l], weightDelta);
+      this.biases[l] = NeuralNetwork.add(this.biases[l], grad);
 
-    const hErr = NeuralNetwork.dot(NeuralNetwork.T(this.who),err);
-    let hGrad = NeuralNetwork.map(h,dSigmoid);
-    hGrad = hGrad.map((r,i)=>r.map((v,j)=>v*hErr[i][j]*this.lr));
-    const wihD = NeuralNetwork.dot(hGrad,NeuralNetwork.T(inputs));
-    this.wih = NeuralNetwork.add(this.wih,wihD);
-    this.bh  = NeuralNetwork.add(this.bh,hGrad);
+      if (l > 0) {
+        delta = NeuralNetwork.dot(NeuralNetwork.T(this.weights[l]), delta);
+      }
+    }
+  }
+
+  clone() {
+    const copy = new NeuralNetwork(this.layers, this.lr);
+    copy.weights = this.weights.map(r => r.map(rr => [...rr]));
+    copy.biases = this.biases.map(r => r.map(rr => [...rr]));
+    return copy;
+  }
+
+  mutate(rate = 0.05) {
+    const jitter = v => v + (Math.random() * 2 - 1) * rate;
+    this.weights = this.weights.map(r => r.map(rr => rr.map(jitter)));
+    this.biases = this.biases.map(r => r.map(rr => rr.map(jitter)));
+    return this;
   }
 }
