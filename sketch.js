@@ -16,6 +16,13 @@ let deadGenerations = 0;
 let pointerPositions = [];
 let TOTAL_FOOD = 60; // desired constant food count
 
+// === SPOOK SETTINGS ===
+let spookActive = false;
+let spookTimer = 0;
+const SPOOK_DURATION = 30;     // frames (~0.5s at 60fps)
+const SPOOK_ACCEL_BOOST = 1.5; // multiplier for acceleration force
+const SPOOK_RADIUS_BOOST = 2;  // multiplier for repulsion radius
+
 class Fish {
   constructor(x, y) {
     this.pos = createVector(x, y);
@@ -85,14 +92,15 @@ class Fish {
 
     let steer = createVector(0, 0);
 
-    // Pointer repulsion
+    // Pointer repulsion with SPOOK boost
     for (const p of pointerPositions) {
       const d = p5.Vector.dist(this.pos, p);
-      if (d < POINTER_REPEL_RADIUS) {
-        const repel = p5.Vector.sub(this.pos, p)
-          .normalize()
-          .mult(map(d, 0, POINTER_REPEL_RADIUS, POINTER_REPEL_FORCE, 0));
-        steer.add(repel);
+      const radius = spookActive ? POINTER_REPEL_RADIUS * SPOOK_RADIUS_BOOST : POINTER_REPEL_RADIUS;
+      if (d < radius) {
+        let repel = p5.Vector.sub(this.pos, p).normalize();
+        let force = map(d, 0, radius, POINTER_REPEL_FORCE, 0);
+        if (spookActive) force *= SPOOK_ACCEL_BOOST;
+        steer.add(repel.mult(force));
       }
     }
 
@@ -131,7 +139,7 @@ class Fish {
               delete this.targetFood.claimedBy;
               foods.splice(idx, 1);
             }
-            // Replace eaten food to maintain constant count
+            // Replace eaten food
             foods.push(createVector(random(20, width - 20), random(20, height - 20)));
 
             this.vel.mult(POST_EAT_SLOWDOWN);
@@ -229,18 +237,15 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   frameRate(60);
 
-  // Initial spawn of 20 fishes and TOTAL_FOOD food
   spawnFishes(20);
   for (let i = 0; i < TOTAL_FOOD; i++) {
     foods.push(createVector(random(20, width - 20), random(20, height - 20)));
   }
 
-  // Button to set food count dynamically
   document.getElementById('setFoodCountBtn').onclick = () => {
     const val = parseInt(document.getElementById('foodCount').value);
     if (!isNaN(val) && val > 0) {
       TOTAL_FOOD = val;
-      // Adjust foods array to match new TOTAL_FOOD
       while (foods.length < TOTAL_FOOD) {
         foods.push(createVector(random(20, width - 20), random(20, height - 20)));
       }
@@ -257,6 +262,12 @@ function setup() {
 
 function draw() {
   background(20, 50, 100);
+
+  // Manage spook timer
+  if (spookActive) {
+    spookTimer--;
+    if (spookTimer <= 0) spookActive = false;
+  }
 
   for (const f of fishes) f.update(fishes);
   fishes = fishes.filter(f => !f.dead);
@@ -293,16 +304,19 @@ function spawnFishes(n) {
 
 function windowResized() { resizeCanvas(windowWidth, windowHeight); }
 
-// === POINTER/TAP HANDLERS ===
-function mouseMoved() { pointerPositions = [createVector(mouseX, mouseY)]; }
-function mouseDragged() { pointerPositions = [createVector(mouseX, mouseY)]; }
-function mouseReleased() { pointerPositions = []; }
-// === POINTER/TAP HANDLERS ===
-function mouseMoved() { 
-  pointerPositions = [createVector(mouseX, mouseY)]; 
+// === POINTER/TAP HANDLERS WITH SPOOK ===
+function triggerSpook() {
+  spookActive = true;
+  spookTimer = SPOOK_DURATION;
 }
-function mouseDragged() { 
-  pointerPositions = [createVector(mouseX, mouseY)]; 
+
+function mouseMoved() {
+  pointerPositions = [createVector(mouseX, mouseY)];
+  triggerSpook();
+}
+function mouseDragged() {
+  pointerPositions = [createVector(mouseX, mouseY)];
+  triggerSpook();
 }
 function mouseReleased() { 
   pointerPositions = []; 
@@ -312,35 +326,14 @@ function mouseReleased() {
 // Called automatically by p5 when a touch begins
 function touchStarted() {
   pointerPositions = touches.map(t => createVector(t.x, t.y));
-  return false; // prevent default scrolling
+  triggerSpook();
+  return false;
 }
 
 // Called automatically by p5 when a touch moves
 function touchMoved() {
   pointerPositions = touches.map(t => createVector(t.x, t.y));
+  triggerSpook();
   return false;
 }
-
-// Called automatically by p5 when all touches end
-function touchEnded() {
-  pointerPositions = [];
-  return false;
-}
-
-// Called automatically by p5 when the mouse moves
-function mouseMoved() {
-  pointerPositions = [createVector(mouseX, mouseY)];
-}
-
-// Called automatically by p5 when the mouse is dragged
-function mouseDragged() {
-  pointerPositions = [createVector(mouseX, mouseY)];
-}
-
-// Called automatically by p5 when the mouse is released
-function mouseReleased() {
-  pointerPositions = [];
-}
-
-
-
+function touchEnded() { pointerPositions = []; return false; }
