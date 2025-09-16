@@ -12,6 +12,7 @@ const POINTER_REPEL_FORCE = 0.9;   // repulsion strength
 let fishes = [];
 let foods = [];
 let score = 0;
+let foodEatenCount = 0;
 let deadGenerations = 0;
 let pointerPositions = [];
 let TOTAL_FOOD = 60; // desired constant food count
@@ -92,7 +93,7 @@ class Fish {
 
     let steer = createVector(0, 0);
 
-    // Pointer repulsion with SPOOK boost
+    // Pointer repulsion
     for (const p of pointerPositions) {
       const d = p5.Vector.dist(this.pos, p);
       const radius = spookActive ? POINTER_REPEL_RADIUS * SPOOK_RADIUS_BOOST : POINTER_REPEL_RADIUS;
@@ -134,6 +135,7 @@ class Fish {
             this.lastEat = millis();
             this.success++;
             score++;
+            foodEatenCount++;
             const idx = foods.indexOf(this.targetFood);
             if (idx !== -1) {
               delete this.targetFood.claimedBy;
@@ -290,10 +292,11 @@ function draw() {
 
   fill(255);
   text(`Score: ${score}`, 10, 20);
-  text(`Fishes alive: ${fishes.length}`, 10, 40);
-  text(`Dead Generations: ${deadGenerations}`, 10, 60);
-  text(`Food Count: ${foods.length}`, 10, 80);
-  text(`Pointer Repel Radius: ${POINTER_REPEL_RADIUS}px`, 10, 100);
+  text(`Food Eaten: ${foodEatenCount}`, 10, 40);
+  text(`Fishes alive: ${fishes.length}`, 10, 60);
+  text(`Dead Generations: ${deadGenerations}`, 10, 80);
+  text(`Food Count: ${foods.length}`, 10, 100);
+  text(`Pointer Repel Radius: ${POINTER_REPEL_RADIUS}px`, 10, 120);
 }
 
 function spawnFishes(n) {
