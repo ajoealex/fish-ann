@@ -57,17 +57,6 @@ Fish forage for food, grow in size, reproduce when successful, evolve over gener
 
 ---
 
-## 📂 File Structure
-```
-fish-p5js-nn-main/
-├── index.html     # Loads p5.js, nn.js, sketch.js, and UI controls
-├── sketch.js      # Main simulation logic and rendering
-├── nn.js          # Multi-layer feed-forward NN with cloning & mutation
-└── README.md      # Project documentation
-```
-
----
-
 ## 🖱 Usage
 1. Open `index.html` in a modern browser.
 2. Adjust **Fish Count** and **Food Count** using inputs, then click **Spawn** or **Set**.
