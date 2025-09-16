@@ -8,6 +8,8 @@ const POST_EAT_SLOWDOWN = 0.3;
 const NEIGHBOR_RADIUS = 150;
 const POINTER_REPEL_RADIUS = 120;  // distance within which fish are repelled
 const POINTER_REPEL_FORCE = 0.9;   // repulsion strength
+const STARVATION_WARNING = 45000;   // ms before reducing group behavior
+const STARVATION_CRITICAL = 55000;  // ms before splitting from group
 
 let fishes = [];
 let foods = [];
@@ -49,6 +51,11 @@ class Fish {
 
   update(allFishes) {
     if (this.dead) return;
+
+    // Starvation state check
+    const timeHungry = millis() - this.lastEat;
+    let desperate = false;
+    if (timeHungry > STARVATION_WARNING) desperate = true;
 
     // Separation
     let sep = createVector(0, 0);
@@ -93,7 +100,7 @@ class Fish {
 
     let steer = createVector(0, 0);
 
-    // Pointer repulsion
+    // Pointer repulsion with spook
     for (const p of pointerPositions) {
       const d = p5.Vector.dist(this.pos, p);
       const radius = spookActive ? POINTER_REPEL_RADIUS * SPOOK_RADIUS_BOOST : POINTER_REPEL_RADIUS;
@@ -103,6 +110,12 @@ class Fish {
         if (spookActive) force *= SPOOK_ACCEL_BOOST;
         steer.add(repel.mult(force));
       }
+    }
+
+    // Critical starvation: force wandering
+    if (timeHungry > STARVATION_CRITICAL) {
+      const splitForce = p5.Vector.random2D().setMag(this.maxForce * 2);
+      steer.add(splitForce);
     }
 
     if (this.targetFood) {
@@ -165,7 +178,7 @@ class Fish {
     } else { this.stuckTimer = 0; }
     this.lastPos = this.pos.copy();
 
-    // Alignment & cohesion
+    // Alignment & cohesion with desperation adjustment
     let alignment = createVector(0, 0), cohesion = createVector(0, 0), count = 0;
     for (const other of allFishes) {
       if (other === this || other.dead) continue;
@@ -179,8 +192,9 @@ class Fish {
     if (count > 0) {
       alignment.div(count).setMag(this.maxForce * 0.8);
       cohesion.div(count).sub(this.pos).setMag(this.maxForce * 0.6);
-      steer.add(alignment.mult(1.2));
-      steer.add(cohesion.mult(1.2));
+      let groupFactor = desperate ? 0.4 : 1.2;
+      steer.add(alignment.mult(groupFactor));
+      steer.add(cohesion.mult(groupFactor));
     }
 
     if (this.leader) {
@@ -253,7 +267,7 @@ function setup() {
   }
 
   document.getElementById('setFoodCountBtn').onclick = () => {
-    const val = parseInt(foodInput.value);
+    const val = parseInt(document.getElementById('foodCount').value);
     if (!isNaN(val) && val > 0) {
       TOTAL_FOOD = val;
       while (foods.length < TOTAL_FOOD) {
@@ -266,10 +280,9 @@ function setup() {
   };
 
   document.getElementById('spawnBtn').onclick = () => {
-    spawnFishes(parseInt(fishInput.value));
+    spawnFishes(parseInt(document.getElementById('fishCount').value));
   };
 }
-
 
 function draw() {
   background(20, 50, 100);
