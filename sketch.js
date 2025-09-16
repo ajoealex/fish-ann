@@ -239,13 +239,21 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   frameRate(60);
 
+  // Allow clicking and typing into inputs without p5 intercepting
+  const fishInput = document.getElementById('fishCount');
+  const foodInput = document.getElementById('foodCount');
+  fishInput.addEventListener('mousedown', e => e.stopPropagation());
+  foodInput.addEventListener('mousedown', e => e.stopPropagation());
+  fishInput.addEventListener('touchstart', e => e.stopPropagation());
+  foodInput.addEventListener('touchstart', e => e.stopPropagation());
+
   spawnFishes(20);
   for (let i = 0; i < TOTAL_FOOD; i++) {
     foods.push(createVector(random(20, width - 20), random(20, height - 20)));
   }
 
   document.getElementById('setFoodCountBtn').onclick = () => {
-    const val = parseInt(document.getElementById('foodCount').value);
+    const val = parseInt(foodInput.value);
     if (!isNaN(val) && val > 0) {
       TOTAL_FOOD = val;
       while (foods.length < TOTAL_FOOD) {
@@ -258,9 +266,10 @@ function setup() {
   };
 
   document.getElementById('spawnBtn').onclick = () => {
-    spawnFishes(parseInt(document.getElementById('fishCount').value));
+    spawnFishes(parseInt(fishInput.value));
   };
 }
+
 
 function draw() {
   background(20, 50, 100);
