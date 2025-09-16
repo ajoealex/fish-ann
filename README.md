@@ -1,79 +1,98 @@
-# fish-p5js-nn – Neural Network Fish School Simulation
+# Fish Neural Network Simulation (p5.js)
 
-Visit- https://ajoealex.github.io/fish-p5js-nn/
+A p5.js simulation of intelligent schooling fish, driven by neural networks and flocking algorithms. Fishes forage for food, form groups for safety, spook on disturbance, and split off when starving to improve survivability.
 
-## Overview
-This project is an **HTML5 + p5.js** web app that visualizes a **Fish Schooling Simulation (FSS)** driven by simple **neural networks**. Each fish acts as an autonomous agent that uses local sensory input and a small feed-forward neural network to decide its movement. The simulation demonstrates **emergent collective behavior**, commonly studied in **swarm intelligence** and **boids-style** algorithms.
+---
 
-## ✨ Algorithms Used
+## 🚀 Features
+- **Neural Network Control**: Each fish uses a simple feed-forward NN to steer toward food.
+- **Dynamic Schooling**: Classic boid-like behaviors (alignment, cohesion, separation) produce natural schooling formations.
+- **Adaptive Leadership**: Fish with higher success (more food eaten) are followed by others within range.
+- **Starvation Strategy**: When close to death, fish loosen group ties or break off to independently search for food.
+- **Spook Interaction**: Mouse or touch movement briefly boosts repulsion radius and force, scattering schools.
+- **Constant Food Supply**: Eaten food is replaced immediately, maintaining a fixed total food count.
+- **Statistics Tracking**: Displays score, food eaten, fish alive, dead generations, and food count in real time.
 
-### 1. FSS (Fish Schooling Simulation)
-- **Base Concept**: Inspired by Reynolds’ Boids algorithm, FSS simulates fish schooling with three primary rules:
-  - **Separation**: Avoid collisions with nearby fish.
-  - **Alignment**: Align velocity with the average heading of neighbors.
-  - **Cohesion**: Steer toward the average position of neighbors.
-- **Pointer Repulsion**: Adds a repulsion force when the user’s mouse or touch pointer is close (`POINTER_REPEL_RADIUS` and `POINTER_REPEL_FORCE`).
+---
 
-### 2. Neural Network (NN)
-- Each fish owns a small feed-forward neural network (`NeuralNetwork(4, 8, 2, 0.3)`):
-  - **Inputs (4)**: Distances or angles to food, neighbors, and pointer.
-  - **Hidden Layer (8)**: Learns intermediate patterns for steering decisions.
-  - **Outputs (2)**: Desired velocity vector (x, y).
-- Used for adaptive behaviors such as improving foraging efficiency and avoiding hazards.
+## 🧠 Algorithms and Behaviors
 
-### 3. Basic Physics Integration
-- **Velocity and Acceleration**: Uses vector math to integrate velocity (`this.vel`) and acceleration (`this.acc`).
-- **Constraints**: Maximum speed (`this.maxSpeed`), reaction time (`MIN_REACTION_TIME`, `MAX_REACTION_TIME`), and post-eat slowdown (`POST_EAT_SLOWDOWN`).
+### 1. Neural Network (Movement Decision)
+- **Input Layer (4 values)**: Relative distances and normalized food positions.
+- **Hidden Layer**: 8 neurons.
+- **Output Layer (2 values)**: Steering vector components.
+- **Online Training**: Updates weights using movement toward food as the target.
 
-## 🐟 Fish Behaviors
+### 2. Separation
+- Repels fish that are too close to avoid collisions.
 
-| Behavior            | Description                                                                                               |
-|---------------------|-----------------------------------------------------------------------------------------------------------|
-| **Foraging**        | Fish search for spawned food particles (`foods`) and steer toward them. Successful foraging increases score.|
-| **Schooling**       | Fish tend to form schools through separation, alignment, and cohesion forces within `NEIGHBOR_RADIUS`.     |
-| **Pointer Avoidance**| Fish detect the user’s pointer/touch within `POINTER_REPEL_RADIUS` and steer away using a repulsion force. |
-| **Acceleration Burst**| Fish accelerate briefly (`MAX_ACCELERATION_RATE`, `ACCELERATION_DURATION`) when food is near or to avoid collisions.|
-| **Post-Eat Slowdown**| After eating, fish temporarily slow down (`POST_EAT_SLOWDOWN`) to simulate digestion or energy recovery.   |
-| **Boundary Handling**| Fish wrap around or bounce off the edges of the canvas to stay within view.                               |
+### 3. Cohesion
+- Pulls fish toward the average position of nearby neighbors.
 
-## 🛠 Functionalities
+### 4. Alignment
+- Aligns fish velocity with that of nearby neighbors.
 
-1. **Real-Time Animation**: Runs in the browser with p5.js.
-2. **Food Spawning**: Food particles spawn periodically (`spawnInterval`, `foodCountPerSpawn`).
-3. **Scoring System**: Score increments when fish consume food.
-4. **Interactive Pointer**: User input influences fish behavior via repulsion.
-5. **Configurable Constants**: Parameters like reaction time, acceleration, neighbor radius, and repulsion force can be tuned.
-6. **Neural Network Learning (Optional)**: Can evolve or mutate weights between generations to improve fish strategies.
-7. **Generational Tracking**: Dead generations counter (`deadGenerations`) can be used for evolutionary improvement.
+### 5. Leadership Following
+- Fish follow successful leaders with higher food counts.
 
-## ▶ How to Run
+### 6. Edge Repulsion
+- Soft repelling force from screen edges to prevent escaping.
 
-1. **Extract the Archive**:
-   ```bash
-   unzip p5-nn.zip
-   cd p5-nn
-   ```
-2. **Open in Browser**:
-   Simply open `index.html` in a modern browser with internet access for p5.js libraries.
-3. **Controls**:
-   - **Move Pointer / Touch**: Repel fish.
-   - **Wait**: Observe schooling, foraging, and adaptive behaviors over time.
+### 7. Spook Reaction
+- Increases repulsion radius and force for a few frames when mouse or touch is near.
 
-## 📊 Tweakable Parameters
+### 8. Starvation Splitting
+- **>45s hungry**: Reduces group cohesion and alignment.
+- **>55s hungry**: Adds strong wander force to split off and search.
+- **>60s hungry**: Fish dies.
 
-| Constant                | Purpose                                                       |
-|-------------------------|---------------------------------------------------------------|
-| `MIN_STRIVE_DISTANCE`    | Minimum distance fish strive before changing direction.       |
-| `MAX_ACCELERATION_RATE`  | Max rate of acceleration for bursts.                          |
-| `ACCELERATION_DURATION`  | Duration of acceleration bursts (ms).                         |
-| `MIN_REACTION_TIME`      | Min neural reaction time (ms).                                |
-| `MAX_REACTION_TIME`      | Max neural reaction time (ms).                                |
-| `POST_EAT_SLOWDOWN`      | Speed reduction after eating.                                 |
-| `NEIGHBOR_RADIUS`        | Radius for cohesion and alignment.                            |
-| `POINTER_REPEL_RADIUS`   | Pointer repulsion detection radius.                           |
-| `POINTER_REPEL_FORCE`    | Strength of pointer repulsion.                                |
+### 9. Food Replacement
+- Maintains constant food count by spawning new food after each is eaten.
 
-## 📚 Applications
-- Educational tool for understanding neural networks and swarm intelligence.
-- Sandbox for experimenting with reinforcement learning or genetic algorithms.
-- Basis for interactive art or game prototypes.
+### 10. Wandering
+- Random directional adjustments when idle to prevent stagnation.
+
+---
+
+## 📂 File Structure
+```
+fish-p5js-nn-main/
+├── index.html         # Loads p5.js, sketch, and UI
+├── sketch.js          # Main simulation, behaviors, and rendering
+├── neural-network.js  # Simple feed-forward NN implementation
+└── style.css          # Optional styling for controls
+```
+
+---
+
+## 🖱 Usage
+1. Open `index.html` in a modern browser.
+2. Adjust **Fish Count** and **Food Count**, then click **Spawn** or **Set**.
+3. Move your mouse or finger near fish to spook them.
+4. Observe schooling, splitting, and adaptive behaviors.
+
+---
+
+## 📱 Mobile Support
+- Touch gestures work like mouse spook behavior.
+- Multi-touch disperses multiple groups.
+
+---
+
+## 🧠 Tech Stack
+- [p5.js](https://p5js.org/) for rendering and event handling.
+- JavaScript classes for fish and neural networks.
+
+---
+
+## ⚙️ Key Configurations
+- `MIN_STRIVE_DISTANCE`: Minimum fish spacing.
+- `MAX_ACCELERATION_RATE`: Maximum acceleration boost.
+- `STARVATION_WARNING` & `STARVATION_CRITICAL`: Hunger-driven split behavior.
+- `POINTER_REPEL_RADIUS` & `POINTER_REPEL_FORCE`: Spook interaction strength.
+- `TOTAL_FOOD`: Total number of food items.
+
+---
+
+## 📜 License
+MIT License © 2025 Ajoe Alex
