@@ -234,18 +234,18 @@ function setup() {
   for (let i = 0; i < TOTAL_FOOD; i++) {
     foods.push(createVector(random(20, width - 20), random(20, height - 20)));
   }
-  document.getElementById('setFoodCountBtn').onclick = () => {
-    const val = parseInt(document.getElementById('foodCount').value);
-    if (!isNaN(val) && val > 0) {
-      // Adjust TOTAL_FOOD target and resize foods array accordingly
-      while (foods.length < val) {
-        foods.push(createVector(random(20, width - 20), random(20, height - 20)));
-      }
-      while (foods.length > val) {
-        foods.pop();
-      }
+document.getElementById('setFoodCountBtn').onclick = () => {
+  const val = parseInt(document.getElementById('foodCount').value);
+  if (!isNaN(val) && val > 0) {
+    // Adjust TOTAL_FOOD dynamically
+    while (foods.length < val) {
+      foods.push(createVector(random(20, width-20), random(20, height-20)));
     }
-  };
+    while (foods.length > val) {
+      foods.pop();
+    }
+  }
+};
 
   document.getElementById('spawnBtn').onclick = () => {
     spawnFishes(parseInt(document.getElementById('fishCount').value));
