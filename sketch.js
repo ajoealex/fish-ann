@@ -14,7 +14,7 @@ let foods = [];
 let score = 0;
 let deadGenerations = 0;
 let pointerPositions = [];
-const TOTAL_FOOD = 60; // desired constant food count
+let TOTAL_FOOD = 60; // desired constant food count
 
 class Fish {
   constructor(x, y) {
@@ -303,3 +303,4 @@ function touchMoved() {
   return false;
 }
 function touchEnded() { pointerPositions = []; }
+
