@@ -11,9 +11,30 @@
   <script src="utils.js"></script>
   <script src="inputHandlers.js"></script>
   <script src="sketch.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px;
+      border-radius: 6px;
+      color: white;
+      font-family: sans-serif;
+    }
+    #ui input,
+    #ui button {
+      margin: 2px;
+    }
+  </style>
 </head>
 <body>
-  <div>
+  <div id="ui">
     <input id="fishCount" type="number" value="20" />
     <button id="spawnBtn">Spawn Fishes</button>
     <input id="foodCount" type="number" value="60" />
