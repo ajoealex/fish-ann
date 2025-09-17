@@ -1,28 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Fish-p5js-nn</title>
-  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>Fish Simulation</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="constants.js"></script>
+  <script src="globals.js"></script>
   <script src="nn.js"></script>
+  <script src="fish.js"></script>
+  <script src="utils.js"></script>
+  <script src="inputHandlers.js"></script>
   <script src="sketch.js"></script>
-  <style>
-    body { margin:0; background:#1a1a1a; color:#fff; font-family:sans-serif; text-align:center; overflow:hidden; }
-    canvas { display:block; margin:auto; }
-    #controls { position:fixed; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.5); padding:6px 10px; border-radius:8px; }
-    input,button { margin:0 5px; padding:4px; }
-    label { margin:0 5px; }
-  </style>
 </head>
 <body>
-  <div id="controls">
-    <label>Fishes:</label>
-    <input type="number" id="fishCount" value="20" min="1" max="50">
-    <button id="spawnBtn">Spawn</button>
-    <label>Food Count:</label>
-    <input type="number" id="foodCount" value="60" min="1" step="1">
-    <button id="setFoodCountBtn">Set</button>
+  <div>
+    <input id="fishCount" type="number" value="20" />
+    <button id="spawnBtn">Spawn Fishes</button>
+    <input id="foodCount" type="number" value="60" />
+    <button id="setFoodCountBtn">Set Food Count</button>
+    <button id="toggleEatRadiusBtn">Toggle Eat Radius</button>
+    <button id="toggleFoodTargetBtn">Toggle Food Target</button>
+    <input id="blendSlider" type="range" min="0" max="1" step="0.01" value="0.5" />
   </div>
 </body>
 </html>
-
