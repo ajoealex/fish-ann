@@ -1,4 +1,5 @@
 # Fish Neural Network Simulation (p5.js)
+https://ajoealex.github.io/fish-p5js-nn/
 
 A p5.js simulation of intelligent schooling fish, driven by **deep neural networks, flocking rules, and evolutionary adaptation**.  
 Fish forage for food, grow in size, reproduce when successful, evolve over generations, spook on disturbances, and split off when starving to improve survivability.
